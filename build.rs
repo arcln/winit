@@ -25,10 +25,10 @@ fn main() {
     // Winit defined cfgs.
     println!("cargo:rustc-check-cfg=cfg(unreleased_changelogs)");
 
-    // We need MetalKit when referencing MTKView via extern_class on iOS.
+    // We need MetalKit when referencing MTKView via extern_class on Apple platforms.
     // TODO: support MTKView through objc2-metal-kit when it'll beupdated.
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    if target_os == "ios" {
+    if target_os == "ios" || target_os == "macos" {
         println!("cargo:rustc-link-lib=framework=MetalKit");
     }
 }

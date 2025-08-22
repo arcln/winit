@@ -5,7 +5,7 @@ use std::ptr;
 
 use objc2::rc::{Retained, WeakId};
 use objc2::runtime::{AnyObject, Sel};
-use objc2::{declare_class, msg_send_id, mutability, sel, ClassType, DeclaredClass};
+use objc2::{declare_class, extern_class, msg_send_id, mutability, sel, ClassType, DeclaredClass};
 use objc2_app_kit::{
     NSApplication, NSCursor, NSEvent, NSEventPhase, NSResponder, NSTextInputClient,
     NSTrackingRectTag, NSView, NSViewFrameDidChangeNotification,
@@ -31,6 +31,16 @@ use crate::event::{
 };
 use crate::keyboard::{Key, KeyCode, KeyLocation, ModifiersState, NamedKey};
 use crate::platform::macos::OptionAsAlt;
+
+extern_class!(
+    pub struct MTKView;
+
+    unsafe impl ClassType for MTKView {
+        type Super = NSView;
+        type Mutability = mutability::MainThreadOnly;
+        const NAME: &'static str = "MTKView";
+    }
+);
 
 #[derive(Debug)]
 struct CursorState {
@@ -146,7 +156,7 @@ declare_class!(
 
     unsafe impl ClassType for WinitView {
         #[inherits(NSResponder, NSObject)]
-        type Super = NSView;
+        type Super = MTKView;
         type Mutability = mutability::MainThreadOnly;
         const NAME: &'static str = "WinitView";
     }
@@ -523,7 +533,7 @@ declare_class!(
             trace_scope!("insertTab:");
             let window = self.window();
             if let Some(first_responder) = window.firstResponder() {
-                if *first_responder == ***self {
+                if *first_responder == ****self {
                     window.selectNextKeyView(Some(self))
                 }
             }
@@ -534,7 +544,7 @@ declare_class!(
             trace_scope!("insertBackTab:");
             let window = self.window();
             if let Some(first_responder) = window.firstResponder() {
-                if *first_responder == ***self {
+                if *first_responder == ****self {
                     window.selectPreviousKeyView(Some(self))
                 }
             }
